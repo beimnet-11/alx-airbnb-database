@@ -1,53 +1,98 @@
-# SQL Aggregations and Window Functions
+-- 1. Aggregation with GROUP BY: Find total number of bookings made by each user
+SELECT 
+    u.id AS user_id,
+    u.email,
+    u.name,
+    COUNT(b.id) AS total_bookings
+FROM 
+    users u
+LEFT JOIN 
+    bookings b ON u.id = b.user_id
+GROUP BY 
+    u.id, u.email, u.name
+ORDER BY 
+    total_bookings DESC;
 
-This directory contains SQL queries demonstrating aggregation functions and window functions for data analysis.
+-- Alternative with only users who have bookings (using INNER JOIN)
+SELECT 
+    u.id AS user_id,
+    u.email,
+    u.name,
+    COUNT(b.id) AS total_bookings
+FROM 
+    users u
+JOIN 
+    bookings b ON u.id = b.user_id
+GROUP BY 
+    u.id, u.email, u.name
+ORDER BY 
+    total_bookings DESC;
 
-## Files
+-- 2. Window Functions: Rank properties based on total number of bookings received
 
-- `aggregations_and_window_functions.sql` - Contains aggregation and window function examples
+-- Using ROW_NUMBER() - assigns unique sequential numbers
+SELECT 
+    p.id AS property_id,
+    p.title,
+    p.description,
+    COUNT(b.id) AS total_bookings,
+    ROW_NUMBER() OVER (ORDER BY COUNT(b.id) DESC) AS booking_rank
+FROM 
+    properties p
+LEFT JOIN 
+    bookings b ON p.id = b.property_id
+GROUP BY 
+    p.id, p.title, p.description
+ORDER BY 
+    total_bookings DESC;
 
-## Queries Description
+-- Using RANK() - handles ties with same rank, gaps in sequence
+SELECT 
+    p.id AS property_id,
+    p.title,
+    p.description,
+    COUNT(b.id) AS total_bookings,
+    RANK() OVER (ORDER BY COUNT(b.id) DESC) AS booking_rank
+FROM 
+    properties p
+LEFT JOIN 
+    bookings b ON p.id = b.property_id
+GROUP BY 
+    p.id, p.title, p.description
+ORDER BY 
+    total_bookings DESC;
 
-### 1. Aggregation with GROUP BY
-**Objective**: Find the total number of bookings made by each user
+-- Using DENSE_RANK() - handles ties with same rank, no gaps in sequence
+SELECT 
+    p.id AS property_id,
+    p.title,
+    p.description,
+    COUNT(b.id) AS total_bookings,
+    DENSE_RANK() OVER (ORDER BY COUNT(b.id) DESC) AS booking_rank
+FROM 
+    properties p
+LEFT JOIN 
+    bookings b ON p.id = b.property_id
+GROUP BY 
+    p.id, p.title, p.description
+ORDER BY 
+    total_bookings DESC;
 
-**Approach**:
-- Uses `COUNT()` aggregation function with `GROUP BY` clause
-- Two versions: 
-  - LEFT JOIN to include all users (even those with zero bookings)
-  - INNER JOIN to include only users with at least one booking
-- Results ordered by booking count in descending order
-
-**Key Features**:
-- Demonstrates basic aggregation with GROUP BY
-- Shows difference between LEFT JOIN and INNER JOIN in aggregation contexts
-
-### 2. Window Functions
-**Objective**: Rank properties based on total number of bookings received
-
-**Approach**:
-- Uses window functions (`ROW_NUMBER`, `RANK`, `DENSE_RANK`) to assign rankings
-- Each function handles ties differently:
-  - `ROW_NUMBER()`: Unique sequential numbers, no ties
-  - `RANK()`: Same rank for ties, gaps in sequence
-  - `DENSE_RANK()`: Same rank for ties, no gaps in sequence
-- Includes example with `PARTITION BY` for ranking within categories
-
-**Key Features**:
-- Window functions operate over a set of rows without collapsing them
-- Maintain individual row identity while performing calculations across rows
-- `OVER()` clause defines the window for the function
-
-## Function Comparison
-
-| Function | Ties Handling | Sequence | Example Output |
-|----------|---------------|----------|----------------|
-| ROW_NUMBER | No ties | 1,2,3,4 | 1,2,3,4 |
-| RANK | Same rank, gaps | 1,2,2,4 | 1,2,2,4 |
-| DENSE_RANK | Same rank, no gaps | 1,2,2,3 | 1,2,2,3 |
-
-## Database Schema
-The queries assume the following tables:
-- `users` (id, email, name)
-- `properties` (id, title, description, property_type) 
-- `bookings` (id, user_id, property_id, start_date, end_date)
+-- Additional example: Partition by property type (if available) and rank within each type
+-- Assuming there's a property_type column
+/*
+SELECT 
+    p.id AS property_id,
+    p.title,
+    p.property_type,
+    COUNT(b.id) AS total_bookings,
+    RANK() OVER (PARTITION BY p.property_type ORDER BY COUNT(b.id) DESC) AS rank_in_category
+FROM 
+    properties p
+LEFT JOIN 
+    bookings b ON p.id = b.property_id
+GROUP BY 
+    p.id, p.title, p.property_type
+ORDER BY 
+    p.property_type, total_bookings DESC;
+*/
