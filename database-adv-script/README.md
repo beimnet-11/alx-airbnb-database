@@ -38,3 +38,55 @@ The queries assume the following tables exist:
 ## Usage
 
 Run the queries in your SQL database management tool. Make sure to adjust table and column names if your actual schema differs.
+# SQL Subqueries Practice
+
+This directory contains SQL queries demonstrating both correlated and non-correlated subqueries.
+
+## Files
+
+- `subqueries.sql` - Contains subquery examples for the Airbnb database
+
+## Queries Description
+
+### 1. Non-correlated Subquery
+**Objective**: Find all properties where the average rating is greater than 4.0
+
+**Approach**: 
+- Uses a subquery in the WHERE clause to calculate the average rating for each property
+- The subquery executes once for each row in the outer query
+- Returns properties that meet the rating criteria
+
+**Key Features**:
+- Subquery references the outer query's table (correlated subquery)
+- Alternative approach using JOIN and GROUP BY with HAVING clause
+
+### 2. Correlated Subquery
+**Objective**: Find users who have made more than 3 bookings
+
+**Approach**:
+- Uses a correlated subquery in the WHERE clause to count bookings for each user
+- The subquery executes for each row in the outer query, correlating with the user ID
+- Returns users who meet the booking count criteria
+
+**Key Features**:
+- True correlated subquery where inner query depends on outer query
+- Alternative approach using JOIN and GROUP BY for comparison
+
+## Subquery Types Explained
+
+### Non-correlated Subquery
+- Inner query can execute independently of the outer query
+- Executes once and the result is used by the outer query
+- Generally more efficient than correlated subqueries
+
+### Correlated Subquery
+- Inner query references columns from the outer query
+- Executes once for each row processed by the outer query
+- Can be less efficient but provides powerful filtering capabilities
+
+## Database Schema
+The queries assume the following tables:
+- `users` (id, email, name)
+- `properties` (id, title, description) 
+- `reviews` (id, property_id, rating, comment)
+- `bookings` (id, user_id, start_date, end_date)
