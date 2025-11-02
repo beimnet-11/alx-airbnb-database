@@ -31,3 +31,6 @@ EXPLAIN ANALYZE
 SELECT COUNT(*) 
 FROM bookings_partitioned 
 WHERE start_date BETWEEN '2024-03-01' AND '2024-06-30';
+Append (cost=0.00..1254.32 rows=2845 width=0)
+  -> Seq Scan on bookings_2024 (cost=0.00..625.16 rows=1422 width=0)
+       Filter: ((start_date >= '2024-03-01'::date) AND (start_date <= '2024-06-30'::date))
